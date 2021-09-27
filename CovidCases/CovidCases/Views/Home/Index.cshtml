@@ -1,0 +1,73 @@
+﻿@{ ViewData["Title"] = "Top 10 Covid-19 Cases"; }
+
+@if (ViewBag.regionNames.Code == "ERROR")
+{
+<script type="text/javascript">
+
+            window.onload = function () {
+                alert("@ViewBag.regionNames.Message");
+            };
+</script>
+
+}
+
+<div class="container row p-0 m-0">
+    <div class="col-10">
+        <h2>TOP 10 COVID-19 CASES</h2>
+    </div>
+
+    <div style="position: relative; width: inherit">
+        <hr />
+
+        <div id="partialView" style="width: inherit; position: absolute; top: 0; left: 0;">
+            <partial name="_RegionsPartial">
+        </div>
+        <div class="region-list w-50">
+            <select class="custom-select w-50" id="regionName" asp-items="@(new SelectList(@ViewBag.regionNames.RegionsListData, "Name", "Name"))"></select>
+            <button class="btn btn-secondary badge-pill w-25" onclick="fillPartialView()">
+                Report
+                <span id="spinner" class="spinner spinner-border spinner-border-sm" role="status"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+
+        function fillPartialView() {
+            var regionSelected = $("#regionName").val();
+            $('#spinner').addClass('busy')
+            $.ajax({
+                type: 'POST',
+                url: '/Home/GetReports',
+                data: {
+                    requestReport: { RegionName: regionSelected === "Regions" ? '' : regionSelected }
+                },
+                success: function (response) {
+                    $('#partialView').html(response);
+                    $('#spinner').removeClass('busy');
+                },
+            })
+        }
+
+    </script>
+    <style>
+        .spinner {
+            visibility: hidden;
+        }
+
+            .spinner.busy {
+                visibility: visible !important;
+            }
+
+        .region-list {
+            position: absolute;
+            top: 0;
+            left: 0;
+            margin-top: 2rem;
+            padding-left: 15px;
+        }
+    </style>
+}
